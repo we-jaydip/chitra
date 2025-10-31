@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../lib/i18n';
 
 // API Configuration
@@ -26,7 +27,9 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   language: string | null;
+  phone: string | null; // Added for profile creation
   setLanguage: (lang: string) => void;
+  setPhone: (phone: string) => void; // Added for profile creation
   signOut: () => Promise<void>;
   signInWithPhone: (phoneNumber: string) => Promise<void>;
   verifyOTP: (phoneNumber: string, otp: string) => Promise<boolean>;
@@ -58,12 +61,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for existing session in localStorage
+    // Check for existing session in AsyncStorage (React Native)
     const checkExistingSession = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
+        const token = await AsyncStorage.getItem('auth_token');
         if (token) {
           const data = await apiCall('/auth/verify-session', {
             headers: {
@@ -82,7 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (userData.success && userData.user) {
               setSession(data.session);
               setUser(userData.user);
-              const userLanguage = userData.user.language || 'en';
+              setPhone(userData.user.phone_number);
+              const userLanguage = userData.user.language || 'english';
               setLanguage(userLanguage);
               // Set i18n language
               i18n.changeLanguage(userLanguage);
@@ -92,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Error checking existing session:', error);
         // Clear invalid token
-        localStorage.removeItem('auth_token');
+        await AsyncStorage.removeItem('auth_token');
       } finally {
         setLoading(false);
       }
@@ -103,6 +108,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithPhone = async (phoneNumber: string) => {
     try {
+      // Store phone temporarily for OTP screen
+      setPhone(phoneNumber);
+      await AsyncStorage.setItem('tempPhone', phoneNumber);
+      
       await apiCall('/auth/send-otp', {
         method: 'POST',
         body: JSON.stringify({ phoneNumber }),
@@ -121,12 +130,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (data.success) {
-        // Store token in localStorage
-        localStorage.setItem('auth_token', data.token);
+        // Store token in AsyncStorage
+        await AsyncStorage.setItem('auth_token', data.token);
+        await AsyncStorage.removeItem('tempPhone');
         
         setSession(data.session);
         setUser(data.user);
-        const userLanguage = data.user.language || 'en';
+        setPhone(data.user.phone_number);
+        const userLanguage = data.user.language || 'english';
         setLanguage(userLanguage);
         // Set i18n language
         i18n.changeLanguage(userLanguage);
@@ -141,7 +152,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = await AsyncStorage.getItem('auth_token');
       if (token) {
         await apiCall('/auth/logout', {
           method: 'POST',
@@ -149,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             'Authorization': `Bearer ${token}`
           }
         });
-        localStorage.removeItem('auth_token');
+        await AsyncStorage.removeItem('auth_token');
       }
     } catch (error) {
       console.error('Error signing out:', error);
@@ -157,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       setLanguage(null);
+      setPhone(null);
     }
   };
 
@@ -165,9 +177,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Change i18n language
     await i18n.changeLanguage(lang);
     
-    if (user) {
+    if (user && session) {
       try {
-        const token = localStorage.getItem('auth_token');
+        const token = await AsyncStorage.getItem('auth_token');
         if (token) {
           await apiCall('/users/language', {
             method: 'PUT',
@@ -188,8 +200,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user, 
       session, 
       loading, 
-      language, 
-      setLanguage: handleSetLanguage, 
+      language,
+      phone,
+      setLanguage: handleSetLanguage,
+      setPhone,
       signOut,
       signInWithPhone,
       verifyOTP

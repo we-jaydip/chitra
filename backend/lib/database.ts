@@ -1,48 +1,78 @@
-// Check if we're in a browser environment
+// ✅ Detect if the code is running in a browser or Node.js environment
+// (React Native for web may trigger window object)
 const isBrowser = typeof window !== 'undefined';
 
-// Only import pg in Node.js environment
+// Declare variables for PostgreSQL Pool
 let Pool: any = null;
 let pool: any = null;
 
+// ✅ Only import PostgreSQL & dotenv when running in Node.js backend
+// (Importing in browser would cause errors)
 if (!isBrowser) {
   try {
-    const pg = require('pg');
-    Pool = pg.Pool;
-    
-    // Database configuration
+    const pg = require('pg');          // PostgreSQL client library
+    const dotenv = require('dotenv');  // Loads environment variables from .env
+    dotenv.config();                   // Initialize dotenv
+
+    Pool = pg.Pool;                    // Get the Pool class from pg
+
+    // ✅ Database configuration (with safe defaults)
     const dbConfig = {
-      user: process.env.DB_USER || 'vedantpatil',
-      host: process.env.DB_HOST || 'localhost',
-      database: process.env.DB_NAME || 'image_editor_app',
-      password: process.env.DB_PASSWORD || '',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      user: process.env.DB_USER || 'postgres',               // Database username
+      host: process.env.DB_HOST || 'localhost',              // Database host
+      database: process.env.DB_NAME || 'image_editor_app',   // Database name
+      password: String(process.env.DB_PASSWORD || ''),       // Force password as string (fixes "must be a string" error)
+      port: parseInt(process.env.DB_PORT || '5432', 10),     // Convert port from string to number
+      ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }                      // Enable SSL in production
+        : false,                                             // Disable SSL in development
     };
 
-    // Create connection pool
+    // 🧩 Log database configuration (for debugging only)
+    console.log('🧩 Database Config:', {
+      host: dbConfig.host,
+      user: dbConfig.user,
+      passwordType: typeof dbConfig.password, // Should always be 'string'
+      hasPassword: !!dbConfig.password,        // Boolean check
+      database: dbConfig.database,
+      port: dbConfig.port,
+    });
+
+    // ✅ Create a new connection pool
     pool = new Pool(dbConfig);
   } catch (error) {
-    console.warn('PostgreSQL not available:', error);
+    // Catch error if 'pg' is not available or dotenv not found
+    console.warn('⚠️ PostgreSQL not available (non-Node environment):', error);
   }
 }
 
-// Database connection helper
+/* -------------------------------------------------------------------------- */
+/*                         DATABASE CONNECTION HELPER                         */
+/* -------------------------------------------------------------------------- */
+
+// ✅ Function to connect to the PostgreSQL database
 export async function connectToDatabase() {
+  // Block database calls from browser
   if (isBrowser || !pool) {
     throw new Error('Database not available in browser environment');
   }
+
   try {
+    // Connect to the database
     const client = await pool.connect();
-    console.log('Connected to PostgreSQL database');
+    console.log('✅ Connected to PostgreSQL database');
     return client;
   } catch (error) {
-    console.error('Error connecting to database:', error);
+    console.error('❌ Error connecting to database:', error);
     throw error;
   }
 }
 
-// User authentication functions
+/* -------------------------------------------------------------------------- */
+/*                                DATA MODELS                                 */
+/* -------------------------------------------------------------------------- */
+
+// ✅ Define TypeScript interfaces for consistent structure
 export interface User {
   id: string;
   phone_number: string;
@@ -59,172 +89,106 @@ export interface Session {
   created_at: string;
 }
 
-// Create user
+/* -------------------------------------------------------------------------- */
+/*                            USER MANAGEMENT LOGIC                           */
+/* -------------------------------------------------------------------------- */
+
+// ✅ Create new user
 export async function createUser(phoneNumber: string): Promise<User> {
+  // In browser, return mock data (for development/testing)
   if (isBrowser || !pool) {
-    // Return mock user for browser environment
     return {
       id: 'mock-user-' + Date.now(),
       phone_number: phoneNumber,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      language: undefined
     };
   }
-  
+
+  // In Node.js, insert user into PostgreSQL
   const client = await connectToDatabase();
   try {
-    const query = `
-      INSERT INTO users (phone_number, created_at, updated_at)
-      VALUES ($1, NOW(), NOW())
-      RETURNING *
-    `;
-    const result = await client.query(query, [phoneNumber]);
-    return result.rows[0];
+    const result = await client.query(
+      `
+        INSERT INTO users (phone_number, created_at, updated_at)
+        VALUES ($1, NOW(), NOW())
+        RETURNING *
+      `,
+      [phoneNumber]
+    );
+    return result.rows[0]; // Return inserted user data
   } finally {
-    client.release();
+    client.release(); // Release connection back to pool
   }
 }
 
-// Get user by phone number
+// ✅ Get user by phone number
 export async function getUserByPhone(phoneNumber: string): Promise<User | null> {
-  if (isBrowser || !pool) {
-    // Check localStorage for mock user
-    const mockUser = localStorage.getItem(`mock_user_${phoneNumber}`);
-    return mockUser ? JSON.parse(mockUser) : null;
-  }
-  
+  if (isBrowser || !pool) return null;
+
   const client = await connectToDatabase();
   try {
-    const query = 'SELECT * FROM users WHERE phone_number = $1';
-    const result = await client.query(query, [phoneNumber]);
+    const result = await client.query(
+      'SELECT * FROM users WHERE phone_number = $1',
+      [phoneNumber]
+    );
     return result.rows[0] || null;
   } finally {
     client.release();
   }
 }
 
-// Get user by ID
-export async function getUserById(id: string): Promise<User | null> {
-  if (isBrowser || !pool) {
-    // Check localStorage for mock user by ID
-    const mockUser = localStorage.getItem(`mock_user_id_${id}`);
-    return mockUser ? JSON.parse(mockUser) : null;
-  }
-  
-  const client = await connectToDatabase();
-  try {
-    const query = 'SELECT * FROM users WHERE id = $1';
-    const result = await client.query(query, [id]);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
-  }
-}
+/* -------------------------------------------------------------------------- */
+/*                          SESSION MANAGEMENT LOGIC                          */
+/* -------------------------------------------------------------------------- */
 
-// Create session
+// ✅ Create new session (used for login/OTP verification)
 export async function createSession(userId: string, token: string): Promise<Session> {
   if (isBrowser || !pool) {
-    // Return mock session for browser environment
-    const mockSession = {
+    // Return a fake session when running in browser
+    return {
       id: 'mock-session-' + Date.now(),
       user_id: userId,
-      token: token,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      created_at: new Date().toISOString()
+      token,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+      created_at: new Date().toISOString(),
     };
-    localStorage.setItem(`mock_session_${token}`, JSON.stringify(mockSession));
-    return mockSession;
   }
-  
+
   const client = await connectToDatabase();
   try {
-    const query = `
-      INSERT INTO sessions (user_id, token, expires_at, created_at)
-      VALUES ($1, $2, NOW() + INTERVAL '30 days', NOW())
-      RETURNING *
-    `;
-    const result = await client.query(query, [userId, token]);
+    const result = await client.query(
+      `
+        INSERT INTO sessions (user_id, token, expires_at, created_at)
+        VALUES ($1, $2, NOW() + INTERVAL '30 days', NOW())
+        RETURNING *
+      `,
+      [userId, token]
+    );
     return result.rows[0];
   } finally {
     client.release();
   }
 }
 
-// Get session by token
-export async function getSessionByToken(token: string): Promise<Session | null> {
-  if (isBrowser || !pool) {
-    // Check localStorage for mock session
-    const mockSession = localStorage.getItem(`mock_session_${token}`);
-    if (mockSession) {
-      const session = JSON.parse(mockSession);
-      // Check if session is not expired
-      if (new Date(session.expires_at) > new Date()) {
-        return session;
-      }
-    }
-    return null;
-  }
-  
-  const client = await connectToDatabase();
-  try {
-    const query = 'SELECT * FROM sessions WHERE token = $1 AND expires_at > NOW()';
-    const result = await client.query(query, [token]);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
-  }
-}
+/* -------------------------------------------------------------------------- */
+/*                         DATABASE INITIALIZATION                            */
+/* -------------------------------------------------------------------------- */
 
-// Delete session
-export async function deleteSession(token: string): Promise<void> {
-  if (isBrowser || !pool) {
-    // Remove mock session from localStorage
-    localStorage.removeItem(`mock_session_${token}`);
-    return;
-  }
-  
-  const client = await connectToDatabase();
-  try {
-    const query = 'DELETE FROM sessions WHERE token = $1';
-    await client.query(query, [token]);
-  } finally {
-    client.release();
-  }
-}
-
-// Update user language
-export async function updateUserLanguage(userId: string, language: string): Promise<void> {
-  if (isBrowser || !pool) {
-    // Update mock user language in localStorage
-    const mockUser = localStorage.getItem(`mock_user_id_${userId}`);
-    if (mockUser) {
-      const user = JSON.parse(mockUser);
-      user.language = language;
-      user.updated_at = new Date().toISOString();
-      localStorage.setItem(`mock_user_id_${userId}`, JSON.stringify(user));
-    }
-    return;
-  }
-  
-  const client = await connectToDatabase();
-  try {
-    const query = 'UPDATE users SET language = $1, updated_at = NOW() WHERE id = $2';
-    await client.query(query, [language, userId]);
-  } finally {
-    client.release();
-  }
-}
-
-// Initialize database tables
+// ✅ Create tables if they don’t exist
 export async function initializeDatabase(): Promise<void> {
   if (isBrowser || !pool) {
     console.log('Database initialization skipped in browser environment');
     return;
   }
-  
+
   const client = await connectToDatabase();
   try {
+    // Create UUID generator extension (needed for gen_random_uuid)
+    await client.query(`
+      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    `);
+
     // Create users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -233,7 +197,7 @@ export async function initializeDatabase(): Promise<void> {
         language VARCHAR(10),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
+      );
     `);
 
     // Create sessions table
@@ -244,12 +208,11 @@ export async function initializeDatabase(): Promise<void> {
         token VARCHAR(255) UNIQUE NOT NULL,
         expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
+      );
     `);
 
-    console.log('Database tables initialized successfully');
+    console.log('✅ Database tables initialized successfully');
   } finally {
     client.release();
   }
 }
-

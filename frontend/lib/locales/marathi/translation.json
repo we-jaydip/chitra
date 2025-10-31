@@ -1,59 +1,113 @@
 {
+  "profileCreation": {
+    "title": "आपली प्रोफाइल तयार करा",
+    "step1": "व्यक्तिगत माहिती",
+    "step2": "पत्ता माहिती",
+    "step3": "आप कोण आहात?",
+    "step4": "आपली प्रोफाइल पूर्ण करा",
+    "titlePrefix": "शीर्षक उपसर्ग",
+    "firstName": "पहिले नाव",
+    "middleName": "मधले नाव",
+    "surname": "आडनाव",
+    "phone": "फोन (OTP पासून)",
+    "email": "ईमेल",
+    "selectState": "राज्य निवडा",
+    "selectDistrict": "जिल्हा निवडा",
+    "selectTehsil": "तहसील निवडा",
+    "politician": "राजकारणदज्ञ",
+    "individual": "व्यक्तिगत",
+    "business": "व्यावसायिक",
+    "publicFigureDesc": "अभिनेता, गायक, क्रीडा व्यक्ती, इ.",
+    "politicianDesc": "विधायक, राजकारणदज्ञ, नेता",
+    "individualDesc": "व्यक्तिगत प्रोफाइल",
+    "businessOwnerDesc": "उद्यमी, व्यावसायिक व्यक्ती",
+    "brandDesc": "ब्रँड, कंपनी, दुकान",
+    "expertise": "आपली कौशल्य/पद",
+    "briefDescription": "संक्षिप्त विवरण",
+    "vidhansabha": "विधानसभा मतदार संघ",
+    "politicalParty": "राजकीय पक्ष",
+    "politicalDesignation": "राजकीय पद",
+    "occupation": "व्यवसाय",
+    "interests": "आवडी",
+    "businessName": "व्यावसायिक नाव",
+    "businessType": "व्यावसायिक प्रकार",
+    "industry": "उद्योग",
+    "brandName": "ब्रँडचे नाव",
+    "website": "वेबसाइट URL",
+    "whatsappNumber": "व्हाट्सअँप क्रमांक",
+    "next": "पुढे →",
+    "back": "← मागे",
+    "completeProfile": "प्रोफाइल पूर्ण करा ✓",
+    "selectTitle": "शीर्षक निवडा",
+    "selectCategory": "आपली प्रोफाइल श्रेणी निवडा",
+    "enterFirstName": "पहिले नाव प्रविष्ट करा",
+    "enterMiddleName": "मधले नाव प्रविष्ट करा (वैकल्पिक)",
+    "enterSurname": "आडनाव प्रविष्ट करा",
+    "enterEmail": "ईमेल पत्ता प्रविष्ट करा",
+    "selectVidhansabha": "विधानसभा निवडा",
+    "selectParty": "पक्ष निवडा",
+    "optionalSocialMedia": "सोशल मीडिया माहिती ",
+"instagramUsername": "इंस्टाग्राम युजरनेम",
+"facebookUsername": "फेसबुक युजरनेम",
+"twitterUsername": "ट्विटर युजरनेम"
+  },
+
+
   "languageSelection": {
-    "selectLanguage": "तुमची भाषा निवडा",
-    "comingSoon": "अधिक भारतीय भाषांमध्ये लवकरच येत आहे"
+    "selectLanguage": "भाषा निवडा",
+    "comingSoon": "जल्द ही अधिक भारतीय भाषांमध्ये येत आहे"
   },
   "home": {
     "userName": "विवेक पाटील",
-    "userCategory": "राजकारणी",
-    "celebrateDiwali": "दिवाळी\nसाजरी करा",
-    "todaysBest": "आजचे सर्वोत्तम",
-    "upcoming": "येत आहे",
-    "mostLiked": "सर्वाधिक आवडले",
-    "contentType": "सामग्रीचा प्रकार",
-    "whatsappStatus": "व्हॉट्सऍप\nस्टेटस",
-    "instagramReels": "इन्स्टाग्राम\nरील्स",
+    "userCategory": "राजकारणदज्ञ",
+    "celebrateDiwali": "दिवाली\nमनाएं",
+    "todaysBest": "आज का सर्वश्रेष्ठ",
+    "upcoming": "आने वाला",
+    "mostLiked": "सबसे पसंदीदा",
+    "contentType": "सामग्री का प्रकार",
+    "whatsappStatus": "व्हाट्सअँप\nस्टेटस",
+    "instagramReels": "इंस्टाग्राम\nरील्स",
     "youtubeShorts": "यूट्यूब\nशॉर्ट्स",
     "facebookPost": "फेसबुक\nपोस्ट",
-    "add": "जोडा"
+    "add": "जोड़ें"
   },
   "content": {
-    "birthdayWishes": "वाढदिवसाच्या शुभेच्छा",
-    "trendingVideos": "ट्रेंडिंग व्हिडिओ",
-    "quickVideos": "द्रुत व्हिडिओ",
+    "birthdayWishes": "जन्मदिन की शुभकामनाएं",
+    "trendingVideos": "ट्रेंडिंग वीडियो",
+    "quickVideos": "त्वरित वीडियो",
     "socialUpdates": "सामाजिक अपडेट्स",
-    "birthdayCelebration": "वाढदिवस साजरा",
-    "festivalWishes": "सणाच्या शुभेच्छा",
-    "anniversaryPost": "वर्धापन दिन पोस्ट",
-    "weddingInvitation": "लग्न निमंत्रण",
-    "graduationDay": "पदवी दिन",
-    "newYearWishes": "नवीन वर्षाच्या शुभेच्छा",
-    "home": "मुख्यपृष्ठ",
-    "liked": "आवडले",
+    "birthdayCelebration": "जन्मदिन समारोह",
+    "festivalWishes": "त्योहार की शुभकामनाएं",
+    "anniversaryPost": "वर्षगांठ पोस्ट",
+    "weddingInvitation": "शादी का निमंत्रण",
+    "graduationDay": "स्नातक दिवस",
+    "newYearWishes": "नए साल की शुभकामनाएं",
+    "home": "होम",
+    "liked": "पसंदीदा",
     "downloads": "डाउनलोड्स",
-    "share": "शेअर"
+    "share": "शेयर"
   },
   "add": {
-    "createContent": "सामग्री तयार करा",
-    "addYourOwn": "तुमचे स्वतःचे टेम्प्लेट्स आणि डिझाइन जोडा"
+    "createContent": "सामग्री बनाएं",
+    "addYourOwn": "अपने खुद के टेम्प्लेट्स और डिज़ाइन जोड़ें"
   },
   "downloads": {
     "title": "डाउनलोड्स",
-    "subtitle": "तुमची डाउनलोड केलेली सामग्री येथे दिसेल"
+    "subtitle": "आपकी डाउनलोड की गई सामग्री यहाँ दिखेगी"
   },
   "liked": {
-    "title": "आवडलेली सामग्री",
-    "subtitle": "तुमचे आवडते टेम्प्लेट्स येथे दिसतील"
+    "title": "पसंदीदा सामग्री",
+    "subtitle": "आपके पसंदीदा टेम्प्लेट्स यहाँ दिखेंगे"
   },
   "share": {
-    "title": "शेअर",
-    "subtitle": "तुमची निर्मिती इतरांसोबत शेअर करा"
+    "title": "शेयर",
+    "subtitle": "अपनी रचनाएं दूसरों के साथ साझा करें"
   },
   "tabs": {
-    "home": "मुख्यपृष्ठ",
-    "add": "जोडा",
+    "home": "होम",
+    "add": "जोड़ें",
     "downloads": "डाउनलोड्स",
-    "liked": "आवडले",
-    "share": "शेअर"
+    "liked": "पसंदीदा",
+    "share": "शेयर"
   }
 }

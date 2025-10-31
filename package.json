@@ -1,0 +1,39 @@
+{
+  "name": "demoapplication",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Iamalive23802/demoapplication.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Iamalive23802/demoapplication/issues"
+  },
+  "homepage": "https://github.com/Iamalive23802/demoapplication#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "expo": "^54.0.20",
+    "expo-image-picker": "^17.0.8",
+    "expo-router": "^6.0.13",
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-native": "^0.82.1",
+    "react-native-dropdown-select-list": "^2.0.5",
+    "react-native-web": "^0.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "@types/react": "~19.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.2"
+  },
+  "description": ""
+}
